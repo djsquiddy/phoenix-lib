@@ -11,6 +11,7 @@ import com.phoenix.lib.R;
  */
 public class RateThisAppDialog extends BaseRequestFromUserDialog {
     public static final String PREF_KEY_OPT_OUT = "phoenix_rate_app_opt_out";
+
     @Override
     protected void onPositiveButtonPress(Context context) {
         String appPackage = context.getPackageName();

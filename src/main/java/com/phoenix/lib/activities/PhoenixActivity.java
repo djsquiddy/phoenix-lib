@@ -15,9 +15,9 @@ import com.phoenix.lib.utils.GAUtils;
  * Created by Dylan on 7/3/2014.
  */
 public abstract class PhoenixActivity extends FragmentActivity {
-    private BackPressedAction backPressedAction;
     private static GoogleAnalyticsDialog googleAnalyticsDialog = new GoogleAnalyticsDialog();
     private static RateThisAppDialog rateThisAppDialog = new RateThisAppDialog();
+    private BackPressedAction backPressedAction;
 
     public void setBackPressedAction(BackPressedAction backPressedAction) {
         this.backPressedAction = backPressedAction;
@@ -29,9 +29,7 @@ public abstract class PhoenixActivity extends FragmentActivity {
 
         if (GAUtils.getInstance(this).isEnabled()) {
             GoogleAnalytics.getInstance(this).reportActivityStart(this);
-        }
-        else
-        {
+        } else {
             Log.d(getActivityTag(), "Google Analytics is not enabled.");
         }
     }
@@ -50,9 +48,10 @@ public abstract class PhoenixActivity extends FragmentActivity {
     protected void onPause() {
         super.onPause();
 
-        if(rateThisAppDialog != null) {
-        rateThisAppDialog.closeDialogIfOpened(this);
-        }  if(googleAnalyticsDialog != null) {
+        if (rateThisAppDialog != null) {
+            rateThisAppDialog.closeDialogIfOpened(this);
+        }
+        if (googleAnalyticsDialog != null) {
             googleAnalyticsDialog.closeDialogIfOpened(this);
         }
     }

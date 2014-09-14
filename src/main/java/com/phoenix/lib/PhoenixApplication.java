@@ -21,8 +21,7 @@ public abstract class PhoenixApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        if(GAUtils.getInstance(this).isEnabled())
-        {
+        if (GAUtils.getInstance(this).isEnabled()) {
             if (BuildConfig.DEBUG) {// Set the log level to verbose.
                 GoogleAnalytics.getInstance(this).getLogger().setLogLevel(Logger.LogLevel.VERBOSE);
                 GoogleAnalytics.getInstance(this).setDryRun(true);
