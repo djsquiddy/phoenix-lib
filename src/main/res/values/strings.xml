@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">PhoenixLib</string>
+    <string name="phoenix_rate_app_dialog_title">Rate this app</string>
+    <string name="phoenix_rate_app_dialog_message">If you enjoy this app, please take a moment to rate this app. It won\'t take more than a minute. Thank you for your support!</string>
+    <string name="phoenix_rate_app_dialog_ok">Rate now</string>
+    <string name="phoenix_rate_app_dialog_cancel">Remind later</string>
+    <string name="phoenix_rate_app_dialog_no">No, thanks</string>
+    <string name="phoenix_google_analytics_dialog_ok">Enable</string>
+    <string name="phoenix_google_analytics_dialog_cancel">Remind later</string>
+    <string name="phoenix_google_analytics_dialog_no">No, thanks</string>
+</resources>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="phoenix_shadow_text_style">
+        <item name="android:shadowColor">@color/transparent_grey</item>
+        <item name="android:shadowDx">5</item>
+        <item name="android:shadowDy">5</item>
+        <item name="android:shadowRadius">3.5</item>
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+</resources>
