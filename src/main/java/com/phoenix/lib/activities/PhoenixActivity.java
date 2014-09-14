@@ -15,8 +15,8 @@ import com.phoenix.lib.utils.GAUtils;
  * Created by Dylan on 7/3/2014.
  */
 public abstract class PhoenixActivity extends FragmentActivity {
-    private static GoogleAnalyticsDialog googleAnalyticsDialog = new GoogleAnalyticsDialog();
-    private static RateThisAppDialog rateThisAppDialog = new RateThisAppDialog();
+    private static GoogleAnalyticsDialog googleAnalyticsDialog;
+    private static RateThisAppDialog rateThisAppDialog;
     private BackPressedAction backPressedAction;
 
     public void setBackPressedAction(BackPressedAction backPressedAction) {
@@ -37,11 +37,14 @@ public abstract class PhoenixActivity extends FragmentActivity {
     @Override
     protected void onPostResume() {
         super.onPostResume();
-        rateThisAppDialog.onStart(this);
-        rateThisAppDialog.showRateDialogIfNeeded(this);
-
-        googleAnalyticsDialog.onStart(this);
-        googleAnalyticsDialog.showRateDialogIfNeeded(this);
+        if(rateThisAppDialog==null) {rateThisAppDialog = new RateThisAppDialog();
+            rateThisAppDialog.onStart(this);
+            rateThisAppDialog.showRateDialogIfNeeded(this);
+        }
+        if(googleAnalyticsDialog == null) { googleAnalyticsDialog = new GoogleAnalyticsDialog();
+            googleAnalyticsDialog.onStart(this);
+            googleAnalyticsDialog.showRateDialogIfNeeded(this);
+        }
     }
 
     @Override
