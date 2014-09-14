@@ -121,13 +121,13 @@ public abstract class PhoenixActivity extends FragmentActivity {
     @Override
     public void onBackPressed() {
         if (backPressedAction != null) {
-            Log.i(getActivityTag(), "Back Pressed Action");
+            Log.d(getActivityTag(), "Back Pressed Action");
             backPressedAction.onBackPressedAction();
         } else if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            Log.i(getActivityTag(), "Popping backstack");
+            Log.d(getActivityTag(), "Popping backstack");
             getSupportFragmentManager().popBackStack();
         } else {
-            Log.i(getActivityTag(), "Nothing on backstack, calling super");
+            Log.d(getActivityTag(), "Nothing on backstack, calling super");
             super.onBackPressed();
         }
     }
