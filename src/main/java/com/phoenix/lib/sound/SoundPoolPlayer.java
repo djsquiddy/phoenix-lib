@@ -18,9 +18,14 @@ import java.util.List;
  * sound.playShortResource(R.raw.<sound_name>);
  * In on pause or on destroy
  * sound.release();
+ * <p/>
+ * This class only supports one sound playing at a time
  */
 public class SoundPoolPlayer {
     public static String TAG = SoundPoolPlayer.class.getName();
+    private int mCurrentStreamId;
+    private int mCurrentSampleId;
+    private boolean isLooped;
     SoundPool.OnLoadCompleteListener onLoadCompleteListener = new SoundPool.OnLoadCompleteListener() {
 
         @Override
@@ -28,12 +33,13 @@ public class SoundPoolPlayer {
             if (status == 0) {
                 // success
                 Log.d(TAG, "Sound id: " + String.valueOf(sampleId) + " has finished loading");
+                if (sampleId == mCurrentSampleId)
+                    playSampleId(sampleId, isLooped);
             } else {
                 Log.e(TAG, "Sound id: " + String.valueOf(sampleId) + " couldn't be loaded");
             }
         }
     };
-    private int mCurrentStreamId;
     private SoundPool mPlayer = null;
     private float rate = 1.0f;        // Playback rate
     private float masterVolume = 1.0f;    // Master volume level
@@ -68,9 +74,24 @@ public class SoundPoolPlayer {
         return duration;
     }
 
-    public void playShortResource(int resource) {
-        mCurrentStreamId = mPlayer.play(mSounds.get(resource), leftVolume, rightVolume, 0, 0, rate);
+    public int playShortResource(int resource) {
+        mCurrentSampleId = mSounds.get(resource);
+        return playSampleId(mCurrentSampleId, false);
+    }
+
+    private int playSampleId(int sampleId, boolean isLooped) {
+        if (isLooped) {
+            mCurrentStreamId = mPlayer.play(sampleId, 0, 0, 0, -1, rate);
+            mPlayer.setLoop(mCurrentStreamId, -1);
+        } else {
+            mCurrentStreamId = mPlayer.play(sampleId, 0, 0, 0, 0, rate);
+        }
+        Log.d(TAG, "stream sample is " + String.valueOf(mCurrentSampleId));
         Log.d(TAG, "stream id is " + String.valueOf(mCurrentStreamId));
+
+        float volume = getVolumeLevel();
+        mPlayer.setVolume(mCurrentStreamId, volume, volume);
+        return mCurrentStreamId;
     }
 
     public SoundPool getPlayer() {
@@ -78,12 +99,8 @@ public class SoundPoolPlayer {
     }
 
     public int playLoopedResource(int resource) {
-        mCurrentStreamId = mPlayer.play(mSounds.get(resource), 0, 0, 1, -1, rate);
-        mPlayer.setLoop(mCurrentStreamId, -1);
-
-        float volume = getVolumeLevel();
-        mPlayer.setVolume(mCurrentStreamId, volume, volume);
-        return mCurrentStreamId;
+        mCurrentSampleId = mSounds.get(resource);
+        return playSampleId(mCurrentSampleId, true);
     }
 
 

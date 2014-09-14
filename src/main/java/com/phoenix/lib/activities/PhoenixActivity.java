@@ -4,15 +4,20 @@ import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 
+import com.google.android.gms.analytics.GoogleAnalytics;
 import com.phoenix.lib.R;
+import com.phoenix.lib.dialogs.GoogleAnalyticsDialog;
+import com.phoenix.lib.dialogs.RateThisAppDialog;
 import com.phoenix.lib.fragments.PhoenixFragment;
+import com.phoenix.lib.utils.GAUtils;
 
 /**
  * Created by Dylan on 7/3/2014.
  */
 public abstract class PhoenixActivity extends FragmentActivity {
-    BackPressedAction backPressedAction;
-
+    private BackPressedAction backPressedAction;
+    private static GoogleAnalyticsDialog googleAnalyticsDialog = new GoogleAnalyticsDialog();
+    private static RateThisAppDialog rateThisAppDialog = new RateThisAppDialog();
 
     public void setBackPressedAction(BackPressedAction backPressedAction) {
         this.backPressedAction = backPressedAction;
@@ -21,6 +26,44 @@ public abstract class PhoenixActivity extends FragmentActivity {
     @Override
     protected void onStart() {
         super.onStart();
+
+        if (GAUtils.getInstance(this).isEnabled()) {
+            GoogleAnalytics.getInstance(this).reportActivityStart(this);
+        }
+        else
+        {
+            Log.d(getActivityTag(), "Google Analytics is not enabled.");
+        }
+    }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+        rateThisAppDialog.onStart(this);
+        rateThisAppDialog.showRateDialogIfNeeded(this);
+
+        googleAnalyticsDialog.onStart(this);
+        googleAnalyticsDialog.showRateDialogIfNeeded(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if(rateThisAppDialog != null) {
+        rateThisAppDialog.closeDialogIfOpened(this);
+        }  if(googleAnalyticsDialog != null) {
+            googleAnalyticsDialog.closeDialogIfOpened(this);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (GAUtils.getInstance(this).isEnabled()) {
+            GoogleAnalytics.getInstance(this).reportActivityStop(this);
+        }
     }
 
     protected int getSlideInAnimation() {
@@ -92,4 +135,5 @@ public abstract class PhoenixActivity extends FragmentActivity {
     public interface BackPressedAction {
         public void onBackPressedAction();
     }
+
 }
