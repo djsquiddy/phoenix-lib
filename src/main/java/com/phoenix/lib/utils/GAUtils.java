@@ -83,6 +83,17 @@ public class GAUtils {
                 .build());
     }
 
+    public synchronized void sendInfoApp(String categoryResource, String actionResource) {
+        Tracker tracker = getTracker(TrackerName.APP_TRACKER);
+        if (tracker == null)
+            return;
+
+        tracker.send(new HitBuilders.EventBuilder()
+                .setCategory(categoryResource)
+                .setAction(actionResource)
+                .build());
+    }
+
     /**
      * Enum used to identify the tracker that needs to be used for tracking.
      * <p/>
