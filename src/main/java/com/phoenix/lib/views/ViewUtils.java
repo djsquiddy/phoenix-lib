@@ -4,9 +4,12 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.text.Spannable;
+import android.text.style.ForegroundColorSpan;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 import android.widget.ViewFlipper;
 import android.widget.ViewSwitcher;
 
@@ -17,9 +20,6 @@ import com.phoenix.lib.R;
  */
 public class ViewUtils {
     private static int ANIMATION_TIME = 1000;
-
-    //public static final String DEVICE_TEST_ID_NEXUS_5 = "62510AF153B8033719E3A1420DD55B84";
-    // public static final String DEVICE_TEST_ID_NEXUS_7 = "FE0B946965A78593BB520CFF0FB15BA3";
 
     private ViewUtils() {
 
@@ -105,5 +105,12 @@ public class ViewUtils {
 
         viewFlipper.setInAnimation(inAnim);
         viewFlipper.setOutAnimation(outAnim);
+    }
+
+    public static void setColor(TextView view, String fulltext, String subtext, int color) {
+        view.setText(fulltext, TextView.BufferType.SPANNABLE);
+        Spannable str = (Spannable) view.getText();
+        int i = fulltext.indexOf(subtext);
+        str.setSpan(new ForegroundColorSpan(color), i, i+subtext.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
     }
 }

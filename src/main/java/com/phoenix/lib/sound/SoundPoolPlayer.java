@@ -119,7 +119,9 @@ public class SoundPoolPlayer {
     public void stop() {
         Log.d(TAG, "Stopping");
 
-        mPlayer.stop(mCurrentStreamId);
+        if(mPlayer != null) {
+            mPlayer.stop(mCurrentStreamId);
+        }
     }
 
     public void stop(int resource) {
@@ -186,8 +188,10 @@ public class SoundPoolPlayer {
 
     // Cleanup
     public void release() {
-        mPlayer.release();
-        mPlayer = null;
+        if(mPlayer!=null) {
+            mPlayer.release();
+            mPlayer = null;
+        }
     }
 
     private class SoundResourceInfo {
