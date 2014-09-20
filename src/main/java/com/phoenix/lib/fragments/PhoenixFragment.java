@@ -11,6 +11,7 @@ import android.view.ViewGroup;
  */
 public abstract class PhoenixFragment extends Fragment {
     public abstract String getFragmentTag();
+
     protected abstract int getLayoutId();
 
     @Override

@@ -119,7 +119,7 @@ public class SoundPoolPlayer {
     public void stop() {
         Log.d(TAG, "Stopping");
 
-        if(mPlayer != null) {
+        if (mPlayer != null) {
             mPlayer.stop(mCurrentStreamId);
         }
     }
@@ -188,7 +188,7 @@ public class SoundPoolPlayer {
 
     // Cleanup
     public void release() {
-        if(mPlayer!=null) {
+        if (mPlayer != null) {
             mPlayer.release();
             mPlayer = null;
         }

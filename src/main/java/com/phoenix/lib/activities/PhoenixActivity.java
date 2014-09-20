@@ -36,7 +36,7 @@ public abstract class PhoenixActivity extends FragmentActivity {
     protected void onPostResume() {
         super.onPostResume();
 
-        if(rateThisAppDialog==null) {
+        if (rateThisAppDialog == null) {
             rateThisAppDialog = new RateThisAppDialog();
             rateThisAppDialog.onStart(this);
             rateThisAppDialog.showRateDialogIfNeeded(this);
