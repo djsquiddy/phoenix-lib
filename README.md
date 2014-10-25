@@ -1,4 +1,4 @@
-phoenix-android-lib
+phoenix-lib
 ===================
 
 My code base for my personal Android projects
