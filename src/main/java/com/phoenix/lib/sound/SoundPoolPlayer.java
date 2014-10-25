@@ -2,8 +2,8 @@ package com.phoenix.lib.sound;
 
 import android.content.Context;
 import android.media.AudioManager;
-import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.os.Build;
 import android.util.Log;
 import android.util.SparseIntArray;
 
@@ -21,41 +21,41 @@ import java.util.List;
  * <p/>
  * This class only supports one sound playing at a time
  */
-public class SoundPoolPlayer {
+public class SoundPoolPlayer implements SoundPool.OnLoadCompleteListener {
+
+    private final static int INVALID_STREAM_ID = -1;
+    private final static int LOOP_FLAG = -1;
+    private final static int NO_LOOP_FLAG = 0;
+    private int mCurrentStreamId = INVALID_STREAM_ID;
     public static String TAG = SoundPoolPlayer.class.getName();
-    private int mCurrentStreamId;
     private int mCurrentSampleId;
     private boolean isLooped;
-    SoundPool.OnLoadCompleteListener onLoadCompleteListener = new SoundPool.OnLoadCompleteListener() {
-
-        @Override
-        public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
-            if (status == 0) {
-                // success
-                Log.d(TAG, "Sound id: " + String.valueOf(sampleId) + " has finished loading");
-                if (sampleId == mCurrentSampleId)
-                    playSampleId(sampleId, isLooped);
-            } else {
-                Log.e(TAG, "Sound id: " + String.valueOf(sampleId) + " couldn't be loaded");
-            }
-        }
-    };
+    private AudioManager mAudioManager;
     private SoundPool mPlayer = null;
     private float rate = 1.0f;        // Playback rate
     private float masterVolume = 1.0f;    // Master volume level
     private float leftVolume = 1.0f;    // Volume levels for left and right channels
     private float rightVolume = 1.0f;
     private float balance = 0.5f;        // A balance value used to calculate left/right volume levels
-    //private HashMap<Integer, SoundResourceInfo> mSounds = new HashMap<Integer, SoundResourceInfo>();
     private SparseIntArray mSounds = new SparseIntArray();
     private Context mContext;
+
+    public SoundPoolPlayer(Context context, final List<Integer> soundResources) {
+        this(context, 1, soundResources);
+    }
 
     public SoundPoolPlayer(Context context, int soundCount, final List<Integer> soundResources) {
         this.mContext = context;
         // setup SoundPool
-        this.mPlayer = new SoundPool(soundCount, AudioManager.STREAM_MUSIC, 0);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            this.mPlayer = new SoundPool.Builder().setMaxStreams(soundCount).build();
+        } else {
+            this.mPlayer = new SoundPool(soundCount, AudioManager.STREAM_MUSIC, 0);
+        }
 
-        mPlayer.setOnLoadCompleteListener(onLoadCompleteListener);
+        mAudioManager = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
+
+        mPlayer.setOnLoadCompleteListener(this);
 
         if (soundResources != null) {
             for (Integer resource : soundResources) {
@@ -67,11 +67,17 @@ public class SoundPoolPlayer {
         }
     }
 
-    public static int getSoundFileLengthInMs(Context context, int resId) {
-        MediaPlayer mp = MediaPlayer.create(context, resId);
-        int duration = mp.getDuration();
-        mp.release();
-        return duration;
+    @Override
+    public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+        if (status == 0) {
+            // success
+            Log.d(TAG, "Sound id: " + String.valueOf(sampleId) + " has finished loading");
+            if (sampleId == mCurrentSampleId) {
+                playSampleId(sampleId, isLooped);
+            }
+        } else {
+            Log.e(TAG, "Sound id: " + String.valueOf(sampleId) + " couldn't be loaded");
+        }
     }
 
     public int playShortResource(int resource) {
@@ -81,16 +87,20 @@ public class SoundPoolPlayer {
 
     private int playSampleId(int sampleId, boolean isLooped) {
         if (isLooped) {
-            mCurrentStreamId = mPlayer.play(sampleId, 0, 0, 0, -1, rate);
-            mPlayer.setLoop(mCurrentStreamId, -1);
+            isLooped = true;
+            mCurrentStreamId = mPlayer.play(sampleId, leftVolume, rightVolume, 1, LOOP_FLAG, rate);
+            mPlayer.setLoop(mCurrentStreamId, LOOP_FLAG);
         } else {
-            mCurrentStreamId = mPlayer.play(sampleId, 0, 0, 0, 0, rate);
+            isLooped = false;
+            mCurrentStreamId = mPlayer.play(sampleId, leftVolume, rightVolume, 1, NO_LOOP_FLAG, rate);
         }
+
         Log.d(TAG, "stream sample is " + String.valueOf(mCurrentSampleId));
         Log.d(TAG, "stream id is " + String.valueOf(mCurrentStreamId));
 
         float volume = getVolumeLevel();
         mPlayer.setVolume(mCurrentStreamId, volume, volume);
+
         return mCurrentStreamId;
     }
 
@@ -103,11 +113,9 @@ public class SoundPoolPlayer {
         return playSampleId(mCurrentSampleId, true);
     }
 
-
     private float getVolumeLevel() {
-        AudioManager mgr = (AudioManager) mContext.getSystemService(Context.AUDIO_SERVICE);
-        float streamVolumeCurrent = mgr.getStreamVolume(AudioManager.STREAM_MUSIC);
-        float streamVolumeMax = mgr.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        float streamVolumeCurrent = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        float streamVolumeMax = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 
         return streamVolumeCurrent / streamVolumeMax;
     }
@@ -121,6 +129,7 @@ public class SoundPoolPlayer {
 
         if (mPlayer != null) {
             mPlayer.stop(mCurrentStreamId);
+            mCurrentStreamId = -1;
         }
     }
 
@@ -135,7 +144,7 @@ public class SoundPoolPlayer {
     }
 
     public void resume() {
-        Log.d(TAG, "Resuming");
+        Log.d(TAG, "Resume");
         mPlayer.autoResume();
     }
 
@@ -144,12 +153,10 @@ public class SoundPoolPlayer {
         Log.d(TAG, "Changing the volume");
         masterVolume = volumeLevel;
 
-        if (balance < 1.0f) // Left dominant
-        {
+        if (balance < 1.0f) { // Left dominant
             leftVolume = masterVolume;
             rightVolume = masterVolume * balance;
-        } else  // Right dominant
-        {
+        } else { // Right dominant
             rightVolume = masterVolume;
             leftVolume = masterVolume * (2.0f - balance);
         }
@@ -159,17 +166,17 @@ public class SoundPoolPlayer {
         }
     }
 
-
     public void setSpeed(float speed) {
         rate = speed;
 
         // Speed of zero is invalid
-        if (rate < 0.01f)
+        if (rate < 0.01f) {
             rate = 0.01f;
-
+        }
         // Speed has a maximum of 2.0
-        if (rate > 2.0f)
+        if (rate > 2.0f){
             rate = 2.0f;
+        }
     }
 
 
@@ -182,27 +189,52 @@ public class SoundPoolPlayer {
 
 
     public void unload() {
-        if (mPlayer != null)
-            mPlayer.release();
+        if (mPlayer != null){
+            mPlayer.release();}
     }
 
     // Cleanup
     public void release() {
         if (mPlayer != null) {
+            if (mCurrentStreamId != INVALID_STREAM_ID) {
+                mPlayer.unload(mCurrentStreamId);
+            }
+
+            mCurrentStreamId = -1;
             mPlayer.release();
             mPlayer = null;
         }
     }
 
-    private class SoundResourceInfo {
-        public int resourceId = 0;
-        public int soundId = 0;
-        public boolean isPlaying = false;
-        public int streamId = 0;
-        public boolean isLoaded = false;
+    public void onAudioFocusChange(int focusChange) {
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                Log.e(TAG, "Audio focus gain");
+                // resume playback
+                resume();
+                break;
 
-        private SoundResourceInfo(int resourceId) {
-            this.resourceId = resourceId;
+            case AudioManager.AUDIOFOCUS_LOSS:
+                Log.e(TAG, "Audio focus loss");
+                // Lost focus for an unbounded amount of time: stop playback and release media mediaPlayer
+                stop();
+                break;
+
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                Log.e(TAG, "Audio focus loss transient");
+                // Lost focus for a short time, but we have to stop
+                // playback. We don't release the media mediaPlayer because playback
+                // is likely to resume
+                stop();
+                break;
+
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                Log.e(TAG, "Audio focus loss transient can duck");
+                // Lost focus for a short time, but it's ok to keep playing
+                // at an attenuated level
+                setVolume(.1f);
+                break;
         }
     }
+
 }

@@ -33,12 +33,12 @@ public class GAUtils {
     }
 
     private PhoenixApplication getPhoenixApplication() {
-        return (mContext.getApplicationContext() instanceof PhoenixApplication)
-                ? ((PhoenixApplication) mContext.getApplicationContext()) : null;
+        return (mContext.getApplicationContext() instanceof PhoenixApplication) ? ((PhoenixApplication) mContext.getApplicationContext()) : null;
     }
 
     public boolean isEnabled() {
         SharedPreferences preferences = mContext.getSharedPreferences(GoogleAnalyticsDialog.PREF_NAME, Context.MODE_PRIVATE);
+
         return !preferences.getBoolean(GoogleAnalyticsDialog.PREF_KEY_OPT_OUT, false);
     }
 
@@ -49,6 +49,7 @@ public class GAUtils {
             Log.e(TAG, "Trying to get Analytics tracker without an id");
             return null;
         }
+
         if (!mTrackers.containsKey(trackerId)) {
 
             GoogleAnalytics analytics = GoogleAnalytics.getInstance(phoenixApplication);
@@ -63,8 +64,9 @@ public class GAUtils {
 
     public synchronized void sendInfo(TrackerName trackerId, int categoryResource, int actionResource) {
         Tracker tracker = getTracker(trackerId);
-        if (tracker == null)
+        if (tracker == null) {
             return;
+        }
 
         tracker.send(new HitBuilders.EventBuilder()
                 .setCategory(mContext.getString(categoryResource))
@@ -74,8 +76,9 @@ public class GAUtils {
 
     public synchronized void sendInfoApp(int categoryResource, int actionResource) {
         Tracker tracker = getTracker(TrackerName.APP_TRACKER);
-        if (tracker == null)
+        if (tracker == null) {
             return;
+        }
 
         tracker.send(new HitBuilders.EventBuilder()
                 .setCategory(mContext.getString(categoryResource))
@@ -85,8 +88,9 @@ public class GAUtils {
 
     public synchronized void sendInfoApp(String categoryResource, String actionResource) {
         Tracker tracker = getTracker(TrackerName.APP_TRACKER);
-        if (tracker == null)
+        if (tracker == null) {
             return;
+        }
 
         tracker.send(new HitBuilders.EventBuilder()
                 .setCategory(categoryResource)

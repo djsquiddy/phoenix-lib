@@ -27,10 +27,11 @@ public class ViewUtils {
 
     @SuppressWarnings("deprecation")
     public static void setViewBackground(View view, Drawable background) {
-        if (Build.VERSION.SDK_INT >= 16)
+        if (Build.VERSION.SDK_INT >= 16) {
             view.setBackground(background);
-        else
+        } else {
             view.setBackgroundDrawable(background);
+        }
     }
 
     public static void fadeInView(final View view) {
