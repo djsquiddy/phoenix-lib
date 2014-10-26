@@ -41,32 +41,6 @@ public abstract class BaseRequestFromUserDialog {
     private boolean isShowing;
     private Dialog mDialog;
 
-    protected abstract void onPositiveButtonPress(final Context context);
-
-    protected abstract String getDialogTag();
-
-    protected abstract String getKeyInstallDate();
-
-    protected abstract String getKeyLaunchTimes();
-
-    protected abstract String getKeyOptOut();
-
-    /**
-     * Days after installation until showing rate dialog
-     */
-    protected abstract int getInstallDays();
-
-    /**
-     * App launching times until showing rate dialog
-     */
-    protected abstract int getLaunchTimes();
-
-    protected abstract int getPositiveButtonText();
-
-    protected abstract int getDialogMessage();
-
-    protected abstract int getDialogTitle();
-
     /**
      * Call this API when the launcher activity is launched.<br>
      * It is better to call this API in onStart() of the launcher activity.
@@ -94,6 +68,38 @@ public abstract class BaseRequestFromUserDialog {
 
         printStatus(context);
     }
+
+    protected abstract String getKeyInstallDate();
+
+    /**
+     * Print log if enabled
+     *
+     * @param message
+     */
+    protected void log(String message) {
+        if (BuildConfig.DEBUG) {
+            Log.v(getDialogTag(), message);
+        }
+    }
+
+    protected abstract String getKeyLaunchTimes();
+
+    protected abstract String getKeyOptOut();
+
+    /**
+     * Print values in SharedPreferences (used for debug)
+     *
+     * @param context
+     */
+    protected void printStatus(final Context context) {
+        SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        log("*** RateThisApp Status ***");
+        log("Install Date: " + new Date(pref.getLong(getKeyInstallDate(), 0)));
+        log("Launch Times: " + pref.getInt(getKeyLaunchTimes(), 0));
+        log("Opt out: " + pref.getBoolean(getKeyOptOut(), false));
+    }
+
+    protected abstract String getDialogTag();
 
     /**
      * /**
@@ -170,12 +176,23 @@ public abstract class BaseRequestFromUserDialog {
         mDialog.show();
     }
 
-    public void closeDialogIfOpened(Context context) {
-        if (mDialog != null && mDialog.isShowing()) {
-            mDialog.cancel();
-            mDialog = null;
-        }
-    }
+    /**
+     * App launching times until showing rate dialog
+     */
+    protected abstract int getLaunchTimes();
+
+    /**
+     * Days after installation until showing rate dialog
+     */
+    protected abstract int getInstallDays();
+
+    protected abstract int getDialogTitle();
+
+    protected abstract int getDialogMessage();
+
+    protected abstract int getPositiveButtonText();
+
+    protected abstract void onPositiveButtonPress(final Context context);
 
     /**
      * Clear data in shared preferences.<br>
@@ -204,27 +221,10 @@ public abstract class BaseRequestFromUserDialog {
         editor.apply();
     }
 
-    /**
-     * Print values in SharedPreferences (used for debug)
-     *
-     * @param context
-     */
-    protected void printStatus(final Context context) {
-        SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        log("*** RateThisApp Status ***");
-        log("Install Date: " + new Date(pref.getLong(getKeyInstallDate(), 0)));
-        log("Launch Times: " + pref.getInt(getKeyLaunchTimes(), 0));
-        log("Opt out: " + pref.getBoolean(getKeyOptOut(), false));
-    }
-
-    /**
-     * Print log if enabled
-     *
-     * @param message
-     */
-    protected void log(String message) {
-        if (BuildConfig.DEBUG) {
-            Log.v(getDialogTag(), message);
+    public void closeDialogIfOpened(Context context) {
+        if (mDialog != null && mDialog.isShowing()) {
+            mDialog.cancel();
+            mDialog = null;
         }
     }
 }

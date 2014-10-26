@@ -17,6 +17,24 @@ import java.util.HashMap;
  * Created by Dylan on 9/14/2014.
  */
 public class GAUtils {
+    /**
+     * Enum used to identify the tracker that needs to be used for tracking.
+     * <p/>
+     * A single tracker is usually enough for most purposes. In case you do need multiple trackers,
+     * storing them all in Application object helps ensure that they are created only once per
+     * application instance.
+     */
+    public enum TrackerName {
+        APP_TRACKER, // Tracker used only in this
+        // app.
+        GLOBAL_TRACKER, // Tracker used by all the
+        // apps from a company.
+        // eg: roll-up tracking.
+        ECOMMERCE_TRACKER, // Tracker used by all
+        // ecommerce
+        // transactions from a
+        // company.
+    }
     public static final String TAG = GAUtils.class.getSimpleName();
     private static GAUtils mInstance;
     HashMap<TrackerName, Tracker> mTrackers = new HashMap<TrackerName, Tracker>();
@@ -32,14 +50,16 @@ public class GAUtils {
         return mInstance;
     }
 
-    private PhoenixApplication getPhoenixApplication() {
-        return (mContext.getApplicationContext() instanceof PhoenixApplication) ? ((PhoenixApplication) mContext.getApplicationContext()) : null;
-    }
+    public synchronized void sendInfo(TrackerName trackerId, int categoryResource, int actionResource) {
+        Tracker tracker = getTracker(trackerId);
+        if (tracker == null) {
+            return;
+        }
 
-    public boolean isEnabled() {
-        SharedPreferences preferences = mContext.getSharedPreferences(GoogleAnalyticsDialog.PREF_NAME, Context.MODE_PRIVATE);
-
-        return !preferences.getBoolean(GoogleAnalyticsDialog.PREF_KEY_OPT_OUT, false);
+        tracker.send(new HitBuilders.EventBuilder()
+                .setCategory(mContext.getString(categoryResource))
+                .setAction(mContext.getString(actionResource))
+                .build());
     }
 
     public synchronized Tracker getTracker(TrackerName trackerId) {
@@ -62,16 +82,14 @@ public class GAUtils {
         return mTrackers.get(trackerId);
     }
 
-    public synchronized void sendInfo(TrackerName trackerId, int categoryResource, int actionResource) {
-        Tracker tracker = getTracker(trackerId);
-        if (tracker == null) {
-            return;
-        }
+    private PhoenixApplication getPhoenixApplication() {
+        return (mContext.getApplicationContext() instanceof PhoenixApplication) ? ((PhoenixApplication) mContext.getApplicationContext()) : null;
+    }
 
-        tracker.send(new HitBuilders.EventBuilder()
-                .setCategory(mContext.getString(categoryResource))
-                .setAction(mContext.getString(actionResource))
-                .build());
+    public boolean isEnabled() {
+        SharedPreferences preferences = mContext.getSharedPreferences(GoogleAnalyticsDialog.PREF_NAME, Context.MODE_PRIVATE);
+
+        return !preferences.getBoolean(GoogleAnalyticsDialog.PREF_KEY_OPT_OUT, false);
     }
 
     public synchronized void sendInfoApp(int categoryResource, int actionResource) {
@@ -96,24 +114,5 @@ public class GAUtils {
                 .setCategory(categoryResource)
                 .setAction(actionResource)
                 .build());
-    }
-
-    /**
-     * Enum used to identify the tracker that needs to be used for tracking.
-     * <p/>
-     * A single tracker is usually enough for most purposes. In case you do need multiple trackers,
-     * storing them all in Application object helps ensure that they are created only once per
-     * application instance.
-     */
-    public enum TrackerName {
-        APP_TRACKER, // Tracker used only in this
-        // app.
-        GLOBAL_TRACKER, // Tracker used by all the
-        // apps from a company.
-        // eg: roll-up tracking.
-        ECOMMERCE_TRACKER, // Tracker used by all
-        // ecommerce
-        // transactions from a
-        // company.
     }
 }

@@ -25,12 +25,55 @@ import java.util.EnumSet;
  * @author Dylan Jones
  */
 public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnInfoListener, MediaPlayer.OnSeekCompleteListener, AudioManager.OnAudioFocusChangeListener {
+    /**
+     * Wrapper interface for {@link android.media.MediaPlayer.OnPreparedListener}
+     *
+     * @see {@link android.media.MediaPlayer.OnPreparedListener}
+     */
+    public interface IOnPreparedListener {
+        void onPrepared(MediaPlayerWrapper mediaPlayer);
+    }
+    /**
+     * Wrapper interface for {@link android.media.MediaPlayer.OnCompletionListener}
+     *
+     * @see {@link android.media.MediaPlayer.OnCompletionListener}
+     */
+    public interface IOnCompletionListener {
+        void onCompletion(MediaPlayerWrapper mediaPlayer);
+    }
+    /**
+     * Wrapper interface for {@link android.media.MediaPlayer.OnInfoListener}
+     *
+     * @see {@link android.media.MediaPlayer.OnInfoListener}
+     */
+    public interface IOnInfoListener {
+        boolean onInfo(MediaPlayerWrapper mediaPlayer, int what, int extra);
+    }
+    /**
+     * Wrapper interface for {@link android.media.MediaPlayer.OnErrorListener}
+     *
+     * @see {@link android.media.MediaPlayer.OnErrorListener}
+     */
+    public interface IOnErrorListener {
+        boolean onError(MediaPlayerWrapper mediaPlayer, int what, int extra);
+    }
+    /**
+     * Wrapper interface for {@link android.media.MediaPlayer.OnSeekCompleteListener}
+     *
+     * @see {@link android.media.MediaPlayer.OnSeekCompleteListener}
+     */
+    public interface IOnSeekCompleteListener {
+        void onSeekComplete(MediaPlayerWrapper mediaPlayer);
+    }
+    public enum State {
+        IDLE, ERROR, INITIALIZED, PREPARING, PREPARED, STARTED, STOPPED, PLAYBACK_COMPLETE, PAUSED
+    }
     public static String TAG = MediaPlayerWrapper.class.getSimpleName();
     private final MediaPlayer mPlayer = new MediaPlayer();
     private IOnSeekCompleteListener mOnSeekCompleteListener;
     private State currentState;
     private String mName;
-     private IOnCompletionListener mOnCompletionListener;
+    private IOnCompletionListener mOnCompletionListener;
     private IOnPreparedListener mOnPreparedListener;
     private IOnErrorListener mOnErrorListener;
     private IOnInfoListener mOnInfoListener;
@@ -45,7 +88,7 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
     }
 
     /**
-     * @param name for the Media Player
+     * @param name            for the Media Player
      * @param audioStreamType for the Media Player {@link android.media.MediaPlayer#setAudioStreamType(int)}
      */
     public MediaPlayerWrapper(String name, int audioStreamType) {
@@ -111,10 +154,10 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
 
     /**
      * Wrapper method for {@link #setDataSource(android.content.Context, int)} that calls {@link #prepare()} after
-     * @see {@link #setDataSource(android.content.Context, int)}
      *
-     * @param context the Context to use
+     * @param context    the Context to use
      * @param resourceId audio resource id
+     * @see {@link #setDataSource(android.content.Context, int)}
      */
     public void setDataPrepare(final Context context, int resourceId) {
         if (currentState == State.IDLE) {
@@ -125,10 +168,10 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
 
     /**
      * Wrapper method for {@link android.media.MediaPlayer#setDataSource(java.io.FileDescriptor, long, long)}
-     * @see {@link android.media.MediaPlayer#setDataSource(java.io.FileDescriptor, long, long)}
      *
-     * @param context the Context to use
+     * @param context    the Context to use
      * @param resourceId audio resource id
+     * @see {@link android.media.MediaPlayer#setDataSource(java.io.FileDescriptor, long, long)}
      */
     public void setDataSource(final Context context, int resourceId) {
         if (currentState == State.IDLE) {
@@ -169,6 +212,7 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
 
     /**
      * Wrapper method for {@link android.media.MediaPlayer#prepare()}
+     *
      * @see {@link android.media.MediaPlayer#prepare()}
      */
     public void prepare() {
@@ -192,10 +236,10 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
 
     /**
      * Wrapper method for {@link #setDataSource(android.content.Context, int)}  that calls {@link #prepareAsync()} after
-     * @see {@link #setDataSource(android.content.Context, int)}
      *
-     * @param context the Context to use
+     * @param context    the Context to use
      * @param resourceId audio file resource id
+     * @see {@link #setDataSource(android.content.Context, int)}
      */
     public void setDataPrepareAsync(final Context context, int resourceId) {
         if (currentState == State.IDLE) {
@@ -206,6 +250,7 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
 
     /**
      * Wrapper method for {@link android.media.MediaPlayer#prepare()}
+     *
      * @see {@link android.media.MediaPlayer#prepare()}
      */
     public void prepareAsync() {
@@ -224,9 +269,9 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
 
     /**
      * Wrapper method for {@link #setDataSource(java.lang.String)} that calls {@link #prepare()} after
-     * @see {@link #setDataSource(java.lang.String)}
      *
      * @param path the path of the file, or the http/rtsp URL of the stream you want to play
+     * @see {@link #setDataSource(java.lang.String)}
      */
     public void setDataPrepare(String path) {
         if (currentState == State.IDLE) {
@@ -237,9 +282,9 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
 
     /**
      * Wrapper method for {@link android.media.MediaPlayer#setDataSource(java.lang.String)}
-     * @see {@link android.media.MediaPlayer#setDataSource(java.lang.String)}
      *
      * @param path the path of the file, or the http/rtsp URL of the stream you want to play
+     * @see {@link android.media.MediaPlayer#setDataSource(java.lang.String)}
      */
     public void setDataSource(String path) {
         if (currentState == State.IDLE) {
@@ -248,12 +293,12 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
 
                 currentState = State.INITIALIZED;
             } catch (IllegalArgumentException e) {
-                Log.e(TAG,String.format( "Passed in an illegal Argument while loading  audio from path: %s, for: %s", path, mName), e);
+                Log.e(TAG, String.format("Passed in an illegal Argument while loading  audio from path: %s, for: %s", path, mName), e);
             } catch (IllegalStateException e) {
                 Log.e(TAG, String.format("Illegal State while loading  audio from path: %s, for: %s", path, mName), e);
             } catch (IOException e) {
                 Log.e(TAG, String.format("IO exception while loading audio from path: %s, for: %s", path, mName), e);
-            } catch (SecurityException e){
+            } catch (SecurityException e) {
                 Log.e(TAG, String.format("Permission denied opening audio from path: %s, for: %s", path, mName), e);
             }
         } else {
@@ -267,9 +312,9 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
 
     /**
      * Wrapper method for {@link #setDataSource(java.lang.String)} that calls {@link #prepareAsync()} after
-     * @see {@link #setDataSource(java.lang.String)}
      *
      * @param path the path of the file, or the http/rtsp URL of the stream you want to play
+     * @see {@link #setDataSource(java.lang.String)}
      */
     public void setDataPrepareAsync(String path) {
         if (currentState == State.IDLE) {
@@ -279,12 +324,10 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
     }
 
     /**
-     *
      * Wrapper method for {@link android.media.MediaPlayer#setLooping(boolean)}
      *
-     * @see {@link android.media.MediaPlayer#setLooping(boolean)}
-     *
      * @param looping whether to loop or not
+     * @see {@link android.media.MediaPlayer#setLooping(boolean)}
      */
     public void setLooping(boolean looping) {
         Log.d(TAG, String.format("Calling setLooping(%s) For: %s", String.valueOf(looping), mName));
@@ -302,9 +345,8 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
     /**
      * Wrapper method for {@link android.media.MediaPlayer#seekTo(int)}
      *
-     * @see {@link android.media.MediaPlayer#seekTo(int)}
-     *
      * @param msec the offset in milliseconds from the start to seek to
+     * @see {@link android.media.MediaPlayer#seekTo(int)}
      */
     public void seekTo(int msec) {
         Log.d(TAG, "Calling seekTo()" + " For: " + mName);
@@ -433,9 +475,9 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
 
     /**
      * Wrapper method for {@link android.media.MediaPlayer#getCurrentPosition()}
-     * @see {@link android.media.MediaPlayer#getCurrentPosition()}
      *
      * @return the current position in milliseconds
+     * @see {@link android.media.MediaPlayer#getCurrentPosition()}
      */
     public int getCurrentPosition() {
         if (currentState != State.ERROR) {
@@ -447,9 +489,9 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
 
     /**
      * Wrapper method for {@link android.media.MediaPlayer#getDuration()} ()}
-     * @see {@link android.media.MediaPlayer#getDuration()} ()}
      *
      * @return the duration in milliseconds, if no duration is available (for example, if streaming live content), -1 is returned.
+     * @see {@link android.media.MediaPlayer#getDuration()} ()}
      */
     public int getDuration() {
         // Prepared, Started, Paused, Stopped, PlaybackCompleted
@@ -582,55 +624,6 @@ public class MediaPlayerWrapper implements MediaPlayer.OnErrorListener, MediaPla
                 throw new RuntimeException();
             }
         }
-    }
-
-    public enum State {
-        IDLE, ERROR, INITIALIZED, PREPARING, PREPARED, STARTED, STOPPED, PLAYBACK_COMPLETE, PAUSED
-    }
-
-    /**
-     * Wrapper interface for {@link android.media.MediaPlayer.OnPreparedListener}
-     *
-     * @see {@link android.media.MediaPlayer.OnPreparedListener}
-     */
-    public interface IOnPreparedListener {
-        void onPrepared(MediaPlayerWrapper mediaPlayer);
-    }
-
-    /**
-     * Wrapper interface for {@link android.media.MediaPlayer.OnCompletionListener}
-     *
-     * @see {@link android.media.MediaPlayer.OnCompletionListener}
-     */
-    public interface IOnCompletionListener {
-        void onCompletion(MediaPlayerWrapper mediaPlayer);
-    }
-
-    /**
-     * Wrapper interface for {@link android.media.MediaPlayer.OnInfoListener}
-     *
-     * @see {@link android.media.MediaPlayer.OnInfoListener}
-     */
-    public interface IOnInfoListener {
-        boolean onInfo(MediaPlayerWrapper mediaPlayer, int what, int extra);
-    }
-
-    /**
-     * Wrapper interface for {@link android.media.MediaPlayer.OnErrorListener}
-     *
-     * @see {@link android.media.MediaPlayer.OnErrorListener}
-     */
-    public interface IOnErrorListener {
-        boolean onError(MediaPlayerWrapper mediaPlayer, int what, int extra);
-    }
-
-    /**
-     * Wrapper interface for {@link android.media.MediaPlayer.OnSeekCompleteListener}
-     *
-     * @see {@link android.media.MediaPlayer.OnSeekCompleteListener}
-     */
-    public interface IOnSeekCompleteListener {
-        void onSeekComplete(MediaPlayerWrapper mediaPlayer);
     }
 
 }

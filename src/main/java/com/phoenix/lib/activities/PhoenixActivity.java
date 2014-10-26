@@ -14,6 +14,9 @@ import com.phoenix.lib.utils.GAUtils;
  * Created by Dylan on 7/3/2014.
  */
 public abstract class PhoenixActivity extends FragmentActivity {
+    public interface BackPressedAction {
+        public void onBackPressedAction();
+    }
     private static RateThisAppDialog rateThisAppDialog;
     private BackPressedAction backPressedAction;
 
@@ -21,44 +24,21 @@ public abstract class PhoenixActivity extends FragmentActivity {
         this.backPressedAction = backPressedAction;
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        if (GAUtils.getInstance(this).isEnabled()) {
-            GoogleAnalytics.getInstance(this).reportActivityStart(this);
-        } else {
-            Log.d(getActivityTag(), "Google Analytics is not enabled.");
-        }
+    public void reset(Class type) {
+        Intent intent = new Intent(this, type);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        finish();
     }
 
-    @Override
-    protected void onPostResume() {
-        super.onPostResume();
-
-        if (rateThisAppDialog == null) {
-            rateThisAppDialog = new RateThisAppDialog();
-            rateThisAppDialog.onStart(this);
-            rateThisAppDialog.showRateDialogIfNeeded(this);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        if (rateThisAppDialog != null) {
-            rateThisAppDialog.closeDialogIfOpened(this);
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        if (GAUtils.getInstance(this).isEnabled()) {
-            GoogleAnalytics.getInstance(this).reportActivityStop(this);
-        }
+    public void setFragment(PhoenixFragment fragment) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setCustomAnimations(getSlideInAnimation(), getSlideOutAnimation(), getSlideBackStackInAnimation(), getSlideBackStackOutAnimation())
+                .replace(getContentId(), fragment, fragment.getFragmentTag())
+                .addToBackStack(fragment.getFragmentTag())
+                .commit();
     }
 
     protected int getSlideInAnimation() {
@@ -77,26 +57,7 @@ public abstract class PhoenixActivity extends FragmentActivity {
         return R.anim.slide_out_right;
     }
 
-    public abstract String getActivityTag();
-
     protected abstract int getContentId();
-
-    public void reset(Class type) {
-        Intent intent = new Intent(this, type);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        finish();
-    }
-
-    public void setFragment(PhoenixFragment fragment) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .setCustomAnimations(getSlideInAnimation(), getSlideOutAnimation(), getSlideBackStackInAnimation(), getSlideBackStackOutAnimation())
-                .replace(getContentId(), fragment, fragment.getFragmentTag())
-                .addToBackStack(fragment.getFragmentTag())
-                .commit();
-    }
 
     public void reset() {
         Intent intent = new Intent(this, PhoenixActivity.class);
@@ -128,8 +89,46 @@ public abstract class PhoenixActivity extends FragmentActivity {
         }
     }
 
-    public interface BackPressedAction {
-        public void onBackPressedAction();
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        if (rateThisAppDialog != null) {
+            rateThisAppDialog.closeDialogIfOpened(this);
+        }
     }
+
+    @Override
+    protected void onPostResume() {
+        super.onPostResume();
+
+        if (rateThisAppDialog == null) {
+            rateThisAppDialog = new RateThisAppDialog();
+            rateThisAppDialog.onStart(this);
+            rateThisAppDialog.showRateDialogIfNeeded(this);
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (GAUtils.getInstance(this).isEnabled()) {
+            GoogleAnalytics.getInstance(this).reportActivityStart(this);
+        } else {
+            Log.d(getActivityTag(), "Google Analytics is not enabled.");
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (GAUtils.getInstance(this).isEnabled()) {
+            GoogleAnalytics.getInstance(this).reportActivityStop(this);
+        }
+    }
+
+    public abstract String getActivityTag();
 
 }

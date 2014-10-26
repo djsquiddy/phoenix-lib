@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SwipeTextChangerAttributes">
+        <attr name="textColor" format="color"/>
+        <attr name="textGravity" format="integer">
+            <flag name="right" value="0x01"/>
+            <flag name="left" value="0x02"/>
+            <flag name="top" value="0x03"/>
+            <flag name="bottom" value="0x04"/>
+            <flag name="center" value="0x05"/>
+            <flag name="center_vertical" value="0x06"/>
+            <flag name="center_horizontal" value="0x07"/>
+            <flag name="start" value="0x08"/>
+            <flag name="end" value="0x09"/>
+           </attr>
+        <attr name="textSize" format="dimension"/>
+        <attr name="rightToLeftNextValue" format="boolean"/>
+        <attr name="textViewPaddingLeft" format="dimension"/>
+        <attr name="textViewPaddingRight" format="dimension"/>
+        <attr name="textViewPaddingTop" format="dimension"/>
+        <attr name="textViewPaddingBottom" format="dimension"/>
+    </declare-styleable>
+</resources>

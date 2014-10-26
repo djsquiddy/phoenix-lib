@@ -12,17 +12,17 @@ import android.view.ViewGroup;
 public abstract class PhoenixFragment extends Fragment {
     public abstract String getFragmentTag();
 
-    protected abstract int getLayoutId();
-
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        return inflater.inflate(getLayoutId(), container, false);
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         setRetainInstance(true);
     }
+
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        return inflater.inflate(getLayoutId(), container, false);
+    }
+
+    protected abstract int getLayoutId();
 }

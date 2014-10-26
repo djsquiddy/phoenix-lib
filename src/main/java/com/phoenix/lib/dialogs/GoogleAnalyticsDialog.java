@@ -11,21 +11,6 @@ public class GoogleAnalyticsDialog extends BaseRequestFromUserDialog {
     public static final String PREF_KEY_OPT_OUT = "phoenix_google_analytics_opt_out";
 
     @Override
-    protected int getInstallDays() {
-        return 1;
-    }
-
-    @Override
-    protected int getLaunchTimes() {
-        return 5;
-    }
-
-    @Override
-    protected String getDialogTag() {
-        return RateThisAppDialog.class.getSimpleName();
-    }
-
-    @Override
     protected String getKeyInstallDate() {
         return "phoenix_install_date";
     }
@@ -41,8 +26,23 @@ public class GoogleAnalyticsDialog extends BaseRequestFromUserDialog {
     }
 
     @Override
-    protected int getPositiveButtonText() {
-        return R.string.phoenix_google_analytics_dialog_ok;
+    protected String getDialogTag() {
+        return RateThisAppDialog.class.getSimpleName();
+    }
+
+    @Override
+    protected int getLaunchTimes() {
+        return 5;
+    }
+
+    @Override
+    protected int getInstallDays() {
+        return 1;
+    }
+
+    @Override
+    protected int getDialogTitle() {
+        return R.string.phoenix_google_analytics_dialog_title;
     }
 
     @Override
@@ -51,12 +51,12 @@ public class GoogleAnalyticsDialog extends BaseRequestFromUserDialog {
     }
 
     @Override
-    protected void onPositiveButtonPress(final Context context) {
-        setOptOut(context, true);
+    protected int getPositiveButtonText() {
+        return R.string.phoenix_google_analytics_dialog_ok;
     }
 
     @Override
-    protected int getDialogTitle() {
-        return R.string.phoenix_google_analytics_dialog_title;
+    protected void onPositiveButtonPress(final Context context) {
+        setOptOut(context, true);
     }
 }

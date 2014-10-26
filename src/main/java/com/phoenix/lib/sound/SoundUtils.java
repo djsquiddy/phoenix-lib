@@ -7,7 +7,7 @@ import android.media.MediaPlayer;
  * Created by Dylan on 10/25/2014.
  */
 public class SoundUtils {
-    private SoundUtils(){
+    private SoundUtils() {
 
     }
 
@@ -15,7 +15,7 @@ public class SoundUtils {
      * Get the audio file length
      *
      * @param context Context for get the resource
-     * @param resId resource id
+     * @param resId   resource id
      * @return audio file length in milliseconds.
      */
     public static int getAudioLength(Context context, int resId) {
@@ -26,7 +26,7 @@ public class SoundUtils {
         return duration;
     }
 
-    public static int getAudioLength(Context context, String file){
+    public static int getAudioLength(Context context, String file) {
         MediaPlayerWrapper wrapper = new MediaPlayerWrapper(file);
 
         wrapper.setDataPrepare(file);
