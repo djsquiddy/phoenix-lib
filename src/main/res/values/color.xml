@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Log level colors -->
+    <color name="log_level_verbose">#FFBBBBBB</color>
+    <color name="log_level_info">#FFBBB400</color>
+    <color name="log_level_debug">#FF00BB00</color>
+    <color name="log_level_error">#FFBBB400</color>
+    <color name="log_level_assert">#FFFF6B68</color>
+    <color name="log_level_warning">#FFBB7A00</color>
+
     <color name="grey">#ff7f7f7f</color>
     <color name="shadow_grey">#d3d3d3</color>
     <color name="dark_grey">#ff4f4f4f</color>
@@ -75,7 +83,6 @@
     <color name="LightCyan">#E0FFFF</color>
     <color name="BurlyWood">#DEB887</color>
     <color name="Plum">#DDA0DD</color>
-    <color name="Gainsboro">#DCDCDC</color>
     <color name="Crimson">#DC143C</color>
     <color name="PaleVioletRed">#DB7093</color>
     <color name="Goldenrod">#DAA520</color>

@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Stack;
 
 /**
- * Created by Dylan on 10/25/2014.
+ * date: 10/25/2014
+ *
+ * @author Dylan
  */
 public class SwipeTextChanger extends TextSwitcher implements GestureDetector.OnGestureListener, ViewSwitcher.ViewFactory, View.OnTouchListener {
     public interface IOnValuesCompleted {
@@ -43,9 +45,9 @@ public class SwipeTextChanger extends TextSwitcher implements GestureDetector.On
         TOP_TO_BOTTOM, BOTTOM_TO_TOP, LEFT_TO_RIGHT, RIGHT_TO_LEFT
     }
 
-    private final int SWIPE_THRESHOLD = 100;
-    private final int SWIPE_VELOCITY_THRESHOLD = 200;
-    private final int MAX_PREV_LIST_SIZE = 10;
+    private static final int SWIPE_THRESHOLD = 100;
+    private static final int SWIPE_VELOCITY_THRESHOLD = 200;
+    private static final int MAX_PREV_LIST_SIZE = 10;
     private final Stack<Integer> mPrevList = new Stack<Integer>();
     private final TextViewPadding mTextViewPadding = new TextViewPadding();
     private boolean mIsRightToLeftChangeValue;
@@ -168,10 +170,10 @@ public class SwipeTextChanger extends TextSwitcher implements GestureDetector.On
         return mValues.get(mCurrentIndex);
     }
 
-    public void changeCharTextColor(int color, int index) {
+    public void changeCharTextColor(int index) {
         String text = getCurrentText();
         Spannable wordToSpan = new SpannableString(text);
-        wordToSpan.setSpan(new ForegroundColorSpan(color), index, index + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        wordToSpan.setSpan(new ForegroundColorSpan(Color.BLACK), index, index + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         getView().setText(wordToSpan);
     }
 
@@ -262,16 +264,28 @@ public class SwipeTextChanger extends TextSwitcher implements GestureDetector.On
         } else {
             setNextValue();
         }
+
+        if (mAnimationListener != null) {
+            mAnimationListener.onAnimate(AnimationDirection.LEFT_TO_RIGHT);
+        }
     }
 
     private void onSwipeTopToBottom() {
         setPrevValue();
         ViewUtils.setViewSwitcherAnimTopToBottom(this);
+
+        if (mAnimationListener != null) {
+            mAnimationListener.onAnimate(AnimationDirection.TOP_TO_BOTTOM);
+        }
     }
 
     private void onSwipeBottomToTop() {
         setNextValue();
         ViewUtils.setViewSwitcherAnimBottomToTop(this);
+
+        if (mAnimationListener != null) {
+            mAnimationListener.onAnimate(AnimationDirection.BOTTOM_TO_TOP);
+        }
     }
 
     @Override

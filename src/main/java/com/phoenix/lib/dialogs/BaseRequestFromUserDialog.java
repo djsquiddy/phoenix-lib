@@ -5,10 +5,9 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.util.Log;
 
-import com.phoenix.lib.BuildConfig;
 import com.phoenix.lib.R;
+import com.phoenix.lib.log.Logger;
 
 import java.util.Date;
 
@@ -30,7 +29,9 @@ import java.util.Date;
 /// </summary>
 
 /**
- * Created by Dylan on 9/14/2014.
+ * date: 9/14/2014
+ *
+ * @author Dylan
  */
 public abstract class BaseRequestFromUserDialog {
 
@@ -38,7 +39,6 @@ public abstract class BaseRequestFromUserDialog {
     private Date mInstallDate = new Date();
     private int mLaunchTimes = 0;
     private boolean mOptOut = false;
-    private boolean isShowing;
     private Dialog mDialog;
 
     /**
@@ -52,13 +52,13 @@ public abstract class BaseRequestFromUserDialog {
         if (pref.getLong(getKeyInstallDate(), 0) == 0L) {
             Date now = new Date();
             editor.putLong(getKeyInstallDate(), now.getTime());
-            log("First install: " + now.toString());
+            Logger.d(getDialogTag(), "First install: " + now.toString());
         }
         // Increment launch times
         int launchTimes = pref.getInt(getKeyLaunchTimes(), 0);
         launchTimes++;
         editor.putInt(getKeyLaunchTimes(), launchTimes);
-        log("Launch times; " + launchTimes);
+        Logger.d(getDialogTag(), "Launch times; " + launchTimes);
 
         editor.apply();
 
@@ -71,17 +71,6 @@ public abstract class BaseRequestFromUserDialog {
 
     protected abstract String getKeyInstallDate();
 
-    /**
-     * Print log if enabled
-     *
-     * @param message
-     */
-    protected void log(String message) {
-        if (BuildConfig.DEBUG) {
-            Log.v(getDialogTag(), message);
-        }
-    }
-
     protected abstract String getKeyLaunchTimes();
 
     protected abstract String getKeyOptOut();
@@ -89,14 +78,14 @@ public abstract class BaseRequestFromUserDialog {
     /**
      * Print values in SharedPreferences (used for debug)
      *
-     * @param context
+     * @param context to get the shared preferences
      */
-    protected void printStatus(final Context context) {
+    void printStatus(final Context context) {
         SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
-        log("*** RateThisApp Status ***");
-        log("Install Date: " + new Date(pref.getLong(getKeyInstallDate(), 0)));
-        log("Launch Times: " + pref.getInt(getKeyLaunchTimes(), 0));
-        log("Opt out: " + pref.getBoolean(getKeyOptOut(), false));
+        Logger.d(getDialogTag(), "*** RateThisApp Status ***");
+        Logger.d(getDialogTag(), "Install Date: " + new Date(pref.getLong(getKeyInstallDate(), 0)));
+        Logger.d(getDialogTag(), "Launch Times: " + pref.getInt(getKeyLaunchTimes(), 0));
+        Logger.d(getDialogTag(), "Opt out: " + pref.getBoolean(getKeyOptOut(), false));
     }
 
     protected abstract String getDialogTag();
@@ -105,7 +94,7 @@ public abstract class BaseRequestFromUserDialog {
      * /**
      * Show the rate dialog if the criteria is satisfied
      *
-     * @param context
+     * @param context to be used to create the {@link android.app.AlertDialog AlertDialog}
      */
     public void showRateDialogIfNeeded(final Context context) {
         if (shouldShowRateDialog()) {
@@ -114,9 +103,10 @@ public abstract class BaseRequestFromUserDialog {
     }
 
     /**
-     * Check whether the rate dialog shoule be shown or not
+     * Check whether the rate dialog should be shown or not
      *
-     * @return
+     * @return <true>If the dialog should be shown</true>
+     * <false>The dialog should not be shown</false>
      */
     private boolean shouldShowRateDialog() {
         if (mOptOut) {
@@ -125,7 +115,7 @@ public abstract class BaseRequestFromUserDialog {
             if (mLaunchTimes >= getLaunchTimes()) {
                 return true;
             }
-            long threshold = getInstallDays() * 24 * 60 * 60 * 1000L;    // msec
+            long threshold = getInstallDays() * 24 * 60 * 60 * 1000L;
 
             return new Date().getTime() - mInstallDate.getTime() >= threshold;
         }
@@ -134,9 +124,9 @@ public abstract class BaseRequestFromUserDialog {
     /**
      * Show the rate dialog
      *
-     * @param context
+     * @param context to be used to create the {@link android.app.AlertDialog AlertDialog}
      */
-    public void showRateDialog(final Context context) {
+    void showRateDialog(final Context context) {
         if (mDialog != null && mDialog.isShowing()) {
             return;
         }
@@ -198,9 +188,9 @@ public abstract class BaseRequestFromUserDialog {
      * Clear data in shared preferences.<br>
      * This API is called when the rate dialog is approved or canceled.
      *
-     * @param context
+     * @param context to get the shared preferences
      */
-    protected void clearSharedPreferences(Context context) {
+    void clearSharedPreferences(Context context) {
         SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.remove(getKeyInstallDate());
@@ -211,17 +201,18 @@ public abstract class BaseRequestFromUserDialog {
     /**
      * Set opt out flag. If it is true, the rate dialog will never shown unless app data is cleared.
      *
-     * @param context
-     * @param optOut
+     * @param context to get the shared preferences
+     * @param optOut  does the user want to opt out of showing the dialog
      */
-    protected void setOptOut(final Context context, boolean optOut) {
+    void setOptOut(final Context context, boolean optOut) {
         SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         editor.putBoolean(getKeyOptOut(), optOut);
         editor.apply();
     }
 
-    public void closeDialogIfOpened(Context context) {
+
+    public void closeDialogIfOpened() {
         if (mDialog != null && mDialog.isShowing()) {
             mDialog.cancel();
             mDialog = null;

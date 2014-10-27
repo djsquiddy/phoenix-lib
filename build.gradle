@@ -1,7 +1,7 @@
 apply plugin: 'com.android.library'
 
 repositories {
-    mavenCentral()                                  // find your dependencies on http://search.maven.org
+    mavenCentral()
 }
 
 android {
@@ -27,5 +27,6 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     compile 'com.google.android.gms:play-services:6.1.11'
-    compile 'org.apache.commons:commons-lang3:3.3.2' // add project dependencies here
+    compile 'com.android.support:recyclerview-v7:21.0.0'
+    compile 'org.apache.commons:commons-lang3:3.3.2' 
 }

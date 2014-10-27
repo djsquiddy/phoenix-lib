@@ -3,16 +3,20 @@ package com.phoenix.lib.utils;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.phoenix.lib.activities.PhoenixActivity;
+import com.phoenix.lib.app.PhoenixActivity;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Created by Dylan on 9/14/2014.
+ * date: 9/14/2014
+ *
+ * @author Dylan
  */
 public class DeviceUtils {
-    public static String TAG = DeviceUtils.class.getSimpleName();
+    public static final String TAG = DeviceUtils.class.getSimpleName();
 
     private DeviceUtils() {
 
@@ -25,6 +29,7 @@ public class DeviceUtils {
     }
 
     public static String md5(final String s) {
+
         try {
             // Create MD5 Hash
             MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
@@ -45,7 +50,8 @@ public class DeviceUtils {
         } catch (NoSuchAlgorithmException e) {
             Log.e(TAG, "Error getting device md5 id", e);
         }
-        return "";
+
+        return StringUtils.EMPTY;
     }
 
 }

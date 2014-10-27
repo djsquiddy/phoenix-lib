@@ -1,4 +1,4 @@
-package com.phoenix.lib.fragments;
+package com.phoenix.lib.app;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -7,7 +7,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 /**
- * Created by Dylan on 7/3/2014.
+ * date: 7/3/2014
+ *
+ * @author Dylan
  */
 public abstract class PhoenixFragment extends Fragment {
     public abstract String getFragmentTag();

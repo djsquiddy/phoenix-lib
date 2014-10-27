@@ -1,4 +1,4 @@
-package com.phoenix.lib.activities;
+package com.phoenix.lib.app;
 
 import android.content.Intent;
 import android.support.v4.app.FragmentActivity;
@@ -7,16 +7,18 @@ import android.util.Log;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.phoenix.lib.R;
 import com.phoenix.lib.dialogs.RateThisAppDialog;
-import com.phoenix.lib.fragments.PhoenixFragment;
 import com.phoenix.lib.utils.GAUtils;
 
 /**
- * Created by Dylan on 7/3/2014.
+ * date: 7/3/2014
+ *
+ * @author Dylan
  */
 public abstract class PhoenixActivity extends FragmentActivity {
     public interface BackPressedAction {
         public void onBackPressedAction();
     }
+
     private static RateThisAppDialog rateThisAppDialog;
     private BackPressedAction backPressedAction;
 
@@ -94,7 +96,7 @@ public abstract class PhoenixActivity extends FragmentActivity {
         super.onPause();
 
         if (rateThisAppDialog != null) {
-            rateThisAppDialog.closeDialogIfOpened(this);
+            rateThisAppDialog.closeDialogIfOpened();
         }
     }
 

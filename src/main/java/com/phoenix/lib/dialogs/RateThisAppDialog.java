@@ -7,10 +7,12 @@ import android.net.Uri;
 import com.phoenix.lib.R;
 
 /**
- * Created by Dylan on 7/3/2014.
+ * date: 7/3/2014
+ *
+ * @author Dylan
  */
 public class RateThisAppDialog extends BaseRequestFromUserDialog {
-    public static final String PREF_KEY_OPT_OUT = "phoenix_rate_app_opt_out";
+    private static final String PREF_KEY_OPT_OUT = "phoenix_rate_app_opt_out";
 
     @Override
     protected String getKeyInstallDate() {

@@ -4,10 +4,9 @@ import android.content.Context;
 import android.media.AudioManager;
 import android.media.SoundPool;
 import android.os.Build;
-import android.util.Log;
 import android.util.SparseIntArray;
 
-import com.phoenix.lib.BuildConfig;
+import com.phoenix.lib.log.Logger;
 
 import java.util.List;
 import java.util.Stack;
@@ -25,28 +24,29 @@ import java.util.Stack;
  * This class only supports one sound playing at a time
  */
 public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, AudioManager.OnAudioFocusChangeListener {
-    private final static int INVALID_STREAM_ID = -1;
+    private static final String TAG = SoundPoolManager.class.getName();
+    private static final int INVALID_STREAM_ID = -1;
     private int mCurrentStreamId = INVALID_STREAM_ID;
-    private final static int INVALID_SAMPLE_ID = -1;
-    private final static int LOOP_FLAG = -1;
-    private final static int NO_LOOP_FLAG = 0;
-    public static String TAG = SoundPoolManager.class.getName();
+    private static final int INVALID_SAMPLE_ID = -1;
+    private static final int DEFAULT_STREAM_COUNT = 1;
+    private static final int LOOP_FLAG = -1;
+    private static final int NO_LOOP_FLAG = 0;
     private final int MAX_SOUND_CAPACITY;
     private final Stack<Integer> mPreviouslyUsed = new Stack<Integer>();
     private final SoundPool mPlayer;
+    private final AudioManager mAudioManager;
+    private final SparseIntArray mSounds = new SparseIntArray();
+    private final Context mContext;
     private int mCurrentSampleId;
     private boolean isLooped;
-    private AudioManager mAudioManager;
     private float rate = 1.0f;        // Playback rate
     private float masterVolume = 1.0f;    // Master volume level
     private float leftVolume = 1.0f;    // Volume levels for left and right channels
     private float rightVolume = 1.0f;
     private float balance = 0.5f;        // A balance value used to calculate left/right volume levels
-    private SparseIntArray mSounds = new SparseIntArray();
-    private Context mContext;
 
     public SoundPoolManager(Context context) {
-        this(context, 1, 10);
+        this(context, DEFAULT_STREAM_COUNT, 10);
     }
 
     public SoundPoolManager(Context context, int soundCount, int maxSoundLoaded) {
@@ -56,6 +56,7 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             this.mPlayer = new SoundPool.Builder().setMaxStreams(soundCount).build();
         } else {
+            //noinspection deprecation
             this.mPlayer = new SoundPool(soundCount, AudioManager.STREAM_MUSIC, 0);
         }
 
@@ -78,7 +79,7 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
             loadResource(resourceId, false);
         }
 
-        mCurrentSampleId = INVALID_STREAM_ID;
+        mCurrentSampleId = INVALID_SAMPLE_ID;
     }
 
     private void loadResource(int resource, boolean playAfterLoad) {
@@ -90,9 +91,7 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
             mSounds.removeAt(index);
         }
 
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, "Loading id: " + String.valueOf(resource));
-        }
+        Logger.d(TAG, "Loading id: %s", String.valueOf(resource));
 
         int sampleId = mPlayer.load(mContext, resource, 1);
         if (playAfterLoad) {
@@ -107,14 +106,13 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
     public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
         if (status == 0) {
             // success
-            if (BuildConfig.DEBUG) {
-                Log.d(TAG, "Sound id: " + String.valueOf(sampleId) + " has finished loading");
-            }
+            Logger.d(TAG, "Sound id: %s has finished loading", sampleId);
+
             if (sampleId == mCurrentSampleId) {
                 playSampleId(sampleId);
             }
         } else {
-            Log.e(TAG, "Sound id: " + String.valueOf(sampleId) + " couldn't be loaded");
+            Logger.e(TAG, "Sound id: %s couldn't be loaded", sampleId);
         }
     }
 
@@ -126,10 +124,10 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
             mCurrentStreamId = mPlayer.play(sampleId, leftVolume, rightVolume, 1, NO_LOOP_FLAG, rate);
         }
 
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, "stream sample is " + String.valueOf(mCurrentSampleId));
-            Log.d(TAG, "stream id is " + String.valueOf(mCurrentStreamId));
-        }
+        Logger.d(TAG, "stream sample is %s", mCurrentSampleId);
+        Logger.d(TAG, "stream id is %s", mCurrentStreamId);
+
+
         float volume = getVolumeLevel();
         mPlayer.setVolume(mCurrentStreamId, volume, volume);
 
@@ -145,9 +143,9 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
 
     public int playShortResource(int resource) {
         isLooped = false;
-        mCurrentSampleId = mSounds.get(resource, -1);
+        mCurrentSampleId = mSounds.get(resource, INVALID_SAMPLE_ID);
 
-        if (mCurrentSampleId == -1) {
+        if (mCurrentSampleId == INVALID_SAMPLE_ID) {
             loadResource(resource, true);
 
             return mCurrentStreamId + 1;
@@ -165,8 +163,8 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
 
     public int playLoopedResource(int resource) {
         isLooped = true;
-        mCurrentSampleId = mSounds.get(resource, -1);
-        if (mCurrentSampleId == -1) {
+        mCurrentSampleId = mSounds.get(resource, INVALID_SAMPLE_ID);
+        if (mCurrentSampleId == INVALID_SAMPLE_ID) {
             loadResource(resource, true);
 
             return mCurrentStreamId + 1;
@@ -201,9 +199,8 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
 
     // Set volume values based on existing balance value
     public void setVolume(float volumeLevel) {
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, "Changing the volume");
-        }
+        Logger.d(TAG, "Changing the volume");
+
         masterVolume = volumeLevel;
 
         if (balance < 1.0f) { // Left dominant
@@ -220,8 +217,8 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
     }
 
     public void unloadResource(int resource) {
-        int soundId = mSounds.get(resource, -1);
-        if (soundId != -1) {
+        int soundId = mSounds.get(resource, INVALID_SAMPLE_ID);
+        if (soundId != INVALID_SAMPLE_ID) {
             mPlayer.unload(soundId);
             int index = mPreviouslyUsed.indexOf(soundId);
             mPreviouslyUsed.remove(index);
@@ -238,13 +235,13 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
     public void onAudioFocusChange(int focusChange) {
         switch (focusChange) {
             case AudioManager.AUDIOFOCUS_GAIN:
-                Log.e(TAG, "Audio focus gain");
+                Logger.e(TAG, "Audio focus gain");
                 // resume playback
                 resume();
                 break;
 
             case AudioManager.AUDIOFOCUS_LOSS:
-                Log.e(TAG, "Audio focus loss");
+                Logger.e(TAG, "Audio focus loss");
                 // Lost focus for an unbounded amount of time: stop playback and release media mediaPlayer
                 pause();
 
@@ -252,7 +249,7 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
                 break;
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
-                Log.e(TAG, "Audio focus loss transient");
+                Logger.e(TAG, "Audio focus loss transient");
                 // Lost focus for a short time, but we have to stop
                 // playback. We don't release the media mediaPlayer because playback
                 // is likely to resume
@@ -260,7 +257,7 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
                 break;
 
             case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
-                Log.e(TAG, "Audio focus loss transient can duck");
+                Logger.e(TAG, "Audio focus loss transient can duck");
                 // Lost focus for a short time, but it's ok to keep playing
                 // at an attenuated level
                 setVolume(.1f);
@@ -269,17 +266,13 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
     }
 
     public void resume() {
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, "Resume");
-        }
+        Logger.d(TAG, "Resume");
 
         mPlayer.autoResume();
     }
 
     public void pause() {
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, "Pausing");
-        }
+        Logger.d(TAG, "Pausing");
 
         mPlayer.autoPause();
     }
@@ -293,19 +286,17 @@ public class SoundPoolManager implements SoundPool.OnLoadCompleteListener, Audio
 
             mAudioManager.abandonAudioFocus(this);
 
-            mCurrentStreamId = -1;
+            mCurrentStreamId = INVALID_STREAM_ID;
             mPlayer.release();
         }
     }
 
     public void stop() {
-        if (BuildConfig.DEBUG) {
-            Log.d(TAG, "Stopping");
-        }
+        Logger.d(TAG, "Stopping");
 
         if (mPlayer != null) {
             mPlayer.stop(mCurrentStreamId);
-            mCurrentStreamId = -1;
+            mCurrentStreamId = INVALID_STREAM_ID;
         }
     }
 

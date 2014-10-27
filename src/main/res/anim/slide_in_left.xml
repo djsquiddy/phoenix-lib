@@ -2,10 +2,10 @@
     <translate
         android:duration="@android:integer/config_mediumAnimTime"
         android:fromXDelta="-150%p"
-        android:toXDelta="0" />
+        android:toXDelta="0"/>
     <alpha
         android:duration="@android:integer/config_mediumAnimTime"
         android:fromAlpha="0.25"
-        android:toAlpha="1.0" />
+        android:toAlpha="1.0"/>
 </set>
         

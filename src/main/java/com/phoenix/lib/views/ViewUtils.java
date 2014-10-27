@@ -16,10 +16,12 @@ import android.widget.ViewSwitcher;
 import com.phoenix.lib.R;
 
 /**
- * Created by Dylan on 8/17/2014.
+ * date: 8/17/2014
+ *
+ * @author Dylan
  */
 public class ViewUtils {
-    private static int ANIMATION_TIME = 1000;
+    private static final int ANIMATION_TIME = 1000;
 
     private ViewUtils() {
 

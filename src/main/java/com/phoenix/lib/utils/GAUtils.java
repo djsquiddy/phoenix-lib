@@ -7,14 +7,16 @@ import android.util.Log;
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
-import com.phoenix.lib.PhoenixApplication;
 import com.phoenix.lib.R;
+import com.phoenix.lib.app.PhoenixApplication;
 import com.phoenix.lib.dialogs.GoogleAnalyticsDialog;
 
 import java.util.HashMap;
 
 /**
- * Created by Dylan on 9/14/2014.
+ * date: 9/14/2014
+ *
+ * @author Dylan
  */
 public class GAUtils {
     /**
@@ -35,9 +37,10 @@ public class GAUtils {
         // transactions from a
         // company.
     }
-    public static final String TAG = GAUtils.class.getSimpleName();
+
+    private static final String TAG = GAUtils.class.getSimpleName();
     private static GAUtils mInstance;
-    HashMap<TrackerName, Tracker> mTrackers = new HashMap<TrackerName, Tracker>();
+    private final HashMap<TrackerName, Tracker> mTrackers = new HashMap<TrackerName, Tracker>();
     private Context mContext;
 
     public static GAUtils getInstance(Context context) {

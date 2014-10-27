@@ -5,7 +5,9 @@ import android.content.Context;
 import com.phoenix.lib.R;
 
 /**
- * Created by Dylan on 9/10/2014.
+ * date: 9/10/2014
+ *
+ * @author Dylan
  */
 public class GoogleAnalyticsDialog extends BaseRequestFromUserDialog {
     public static final String PREF_KEY_OPT_OUT = "phoenix_google_analytics_opt_out";

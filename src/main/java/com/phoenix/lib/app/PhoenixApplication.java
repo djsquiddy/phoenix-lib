@@ -1,18 +1,28 @@
-package com.phoenix.lib;
+package com.phoenix.lib.app;
 
 import android.app.Application;
+import android.content.Context;
 
 import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.Logger;
+import com.phoenix.lib.BuildConfig;
 import com.phoenix.lib.utils.GAUtils;
 
 /**
- * Created by Dylan on 9/9/2014.
+ * date: 9/9/2014
+ *
+ * @author Dylan
  */
 public abstract class PhoenixApplication extends Application {
 
+    private static Context sContext;
+
     public PhoenixApplication() {
         super();
+    }
+
+    public static Context getContext() {
+        return sContext;
     }
 
     public abstract int getAnalyticsId();
@@ -20,6 +30,7 @@ public abstract class PhoenixApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        sContext = this;
 
         if (GAUtils.getInstance(this).isEnabled()) {
             if (BuildConfig.DEBUG) {// Set the log level to verbose.
