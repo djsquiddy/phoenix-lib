@@ -16,8 +16,10 @@ import java.util.Stack;
  * <p/>
  * Example usage:
  * SoundPoolPlayer sound = new SoundPoolPlayer(getContext, 4);
+ * <p/>
  * In on create:
  * sound.playShortResource(R.raw.<sound_name>);
+ * <p/>
  * In on pause or on destroy
  * sound.release();
  * <p/>

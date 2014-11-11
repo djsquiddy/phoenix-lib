@@ -19,5 +19,6 @@
         <attr name="textViewPaddingRight" format="dimension"/>
         <attr name="textViewPaddingTop" format="dimension"/>
         <attr name="textViewPaddingBottom" format="dimension"/>
+        <attr name="shuffleWhenFinished" format="boolean"/>
     </declare-styleable>
 </resources>

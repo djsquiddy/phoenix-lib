@@ -52,4 +52,15 @@ public class ListUtils {
 
         return arrayList;
     }
+
+    public static SparseArray<List<Integer>> asSparseListFromKeys(@NonNull SparseArray<SparseIntArray> sparseArray){
+        SparseArray<List<Integer>> sparseArrayList = new SparseArray<List<Integer>>(sparseArray.size());
+
+        for(int i = 0; i < sparseArray.size(); ++i){
+            List<Integer> list = asListFromKeys(sparseArray.get(sparseArray.keyAt(i)));
+            sparseArrayList.append(sparseArray.keyAt(i), list);
+        }
+
+        return sparseArrayList;
+    }
 }

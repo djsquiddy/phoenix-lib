@@ -3,6 +3,8 @@ package com.phoenix.lib.views;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -17,7 +19,12 @@ import android.widget.TextView;
 import android.widget.ViewSwitcher;
 
 import com.phoenix.lib.R;
+import com.phoenix.lib.enums.AnimationDirection;
+import com.phoenix.lib.interfaces.IAnimationListener;
+import com.phoenix.lib.interfaces.IOnListValuesCompleted;
+import com.phoenix.lib.interfaces.IValueChangeListener;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Stack;
 
@@ -27,24 +34,6 @@ import java.util.Stack;
  * @author Dylan
  */
 public class SwipeTextChanger extends TextSwitcher implements GestureDetector.OnGestureListener, ViewSwitcher.ViewFactory, View.OnTouchListener {
-    public interface IOnValuesCompleted {
-        void onValuesCompleted();
-    }
-
-    public interface IValueListener {
-        void onNextValue(int value);
-
-        void onPreviousValue(int value);
-    }
-
-    public interface IAnimationListener {
-        void onAnimate(AnimationDirection direction);
-    }
-
-    public enum AnimationDirection {
-        TOP_TO_BOTTOM, BOTTOM_TO_TOP, LEFT_TO_RIGHT, RIGHT_TO_LEFT
-    }
-
     private static final int SWIPE_THRESHOLD = 100;
     private static final int SWIPE_VELOCITY_THRESHOLD = 200;
     private static final int MAX_PREV_LIST_SIZE = 10;
@@ -58,18 +47,18 @@ public class SwipeTextChanger extends TextSwitcher implements GestureDetector.On
     private int mTextGravityFlags;
     private GestureDetector mGestureDetector;
     private IAnimationListener mAnimationListener;
-    private IValueListener mValueListener;
-    private IOnValuesCompleted mOnValuesCompleted;
+    private IValueChangeListener<Integer> mValueListener;
+    private IOnListValuesCompleted mOnValuesCompleted;
+    private boolean mShuffleWhenFinished;
 
     public SwipeTextChanger(Context context) {
-        super(context, null);
+        this(context, null);
     }
 
     public SwipeTextChanger(Context context, AttributeSet attrs) {
         super(context, attrs);
-
         if (attrs != null) {
-            TypedArray attributes = context.obtainStyledAttributes(attrs, R.styleable.SwipeTextChangerAttributes, 0, 0);
+            TypedArray attributes = getContext().obtainStyledAttributes(attrs, R.styleable.SwipeTextChangerAttributes, 0, 0);
 
             try {
                 mIsRightToLeftChangeValue = attributes.getBoolean(R.styleable.SwipeTextChangerAttributes_rightToLeftNextValue, true);
@@ -80,6 +69,7 @@ public class SwipeTextChanger extends TextSwitcher implements GestureDetector.On
                 mTextViewPadding.bottom = attributes.getDimensionPixelOffset(R.styleable.SwipeTextChangerAttributes_textViewPaddingBottom, 0);
                 mTextViewPadding.left = attributes.getDimensionPixelOffset(R.styleable.SwipeTextChangerAttributes_textViewPaddingLeft, 0);
                 mTextViewPadding.right = attributes.getDimensionPixelOffset(R.styleable.SwipeTextChangerAttributes_textViewPaddingRight, 0);
+                mShuffleWhenFinished = attributes.getBoolean(R.styleable.SwipeTextChangerAttributes_shuffleWhenFinished, false);
             } finally {
                 if (attributes != null) {
                     attributes.recycle();
@@ -88,43 +78,44 @@ public class SwipeTextChanger extends TextSwitcher implements GestureDetector.On
         }
 
         setFactory(this);
-        mGestureDetector = new GestureDetector(context, this);
+        mGestureDetector = new GestureDetector(getContext(), this);
         setOnTouchListener(this);
         setLongClickable(true);
     }
 
-    public void setAnimationListener(IAnimationListener animationListener) {
+    public void setAnimationListener(@Nullable IAnimationListener animationListener) {
         mAnimationListener = animationListener;
     }
 
-    public void setValueListener(IValueListener valueListener) {
+    public void setValueListener(@Nullable IValueChangeListener<Integer> valueListener) {
         mValueListener = valueListener;
     }
 
-    public void setOnValuesCompleted(IOnValuesCompleted onValuesCompleted) {
+    public void setOnValuesCompleted(@Nullable IOnListValuesCompleted onValuesCompleted) {
         mOnValuesCompleted = onValuesCompleted;
     }
 
-    public void setValues(List<Integer> values) {
+    public void setValues(@NonNull List<Integer> values) {
         mValues = values;
-        mCurrentIndex = 0;
+        mCurrentIndex = -1;
         mPrevList.clear();
         setNextValue();
     }
 
     protected void setNextValue() {
-        mPrevList.push(mValues.get(mCurrentIndex));
-        Integer val;
         if (++mCurrentIndex == mValues.size()) {
             if (mOnValuesCompleted != null) {
                 mOnValuesCompleted.onValuesCompleted();
+                return; // Wait until the new list of values comes in to play
+            } else if (mShuffleWhenFinished) {
+                Collections.shuffle(mValues);
             }
-
             mCurrentIndex = 0;
-            val = mValues.get(mCurrentIndex);
-        } else {
-            val = mValues.get(mCurrentIndex);
+        } else if (mCurrentIndex > 0) {
+            mPrevList.push(mValues.get(mCurrentIndex - 1));
         }
+
+        Integer val = mValues.get(mCurrentIndex);
 
         setText(getResources().getString(val));
 
@@ -206,35 +197,53 @@ public class SwipeTextChanger extends TextSwitcher implements GestureDetector.On
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onDown(MotionEvent motionEvent) {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onShowPress(MotionEvent motionEvent) {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onSingleTapUp(MotionEvent motionEvent) {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onScroll(MotionEvent motionEvent, MotionEvent motionEvent2, float v, float v2) {
         return false;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void onLongPress(MotionEvent motionEvent) {
 
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-        float diffY = e2.getY() - e1.getY();
-        float diffX = e2.getX() - e1.getX();
+        final float diffY = e2.getY() - e1.getY();
+        final float diffX = e2.getX() - e1.getX();
 
         if (Math.abs(diffX) > Math.abs(diffY)) {
             if (Math.abs(diffX) > SWIPE_THRESHOLD && Math.abs(velocityX) > SWIPE_VELOCITY_THRESHOLD) {
@@ -255,6 +264,30 @@ public class SwipeTextChanger extends TextSwitcher implements GestureDetector.On
         }
 
         return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean onTouch(View v, MotionEvent event) {
+        mGestureDetector.onTouchEvent(event);
+
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public View makeView() {
+        TextView textView = new TextView(getContext());
+        textView.setGravity(mTextGravityFlags);
+        textView.setTextSize(mTextSize);
+        textView.setTextColor(mTextColor);
+        mTextViewPadding.setPadding(textView);
+
+        return textView;
     }
 
     private void leftToRight() {
@@ -288,23 +321,6 @@ public class SwipeTextChanger extends TextSwitcher implements GestureDetector.On
         }
     }
 
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-        mGestureDetector.onTouchEvent(event);
-
-        return false;
-    }
-
-    @Override
-    public View makeView() {
-        TextView textView = new TextView(getContext());
-        textView.setGravity(mTextGravityFlags);
-        textView.setTextSize(mTextSize);
-        textView.setTextColor(mTextColor);
-        mTextViewPadding.setPadding(textView);
-
-        return textView;
-    }
 
     private class TextViewPadding {
         public int top;

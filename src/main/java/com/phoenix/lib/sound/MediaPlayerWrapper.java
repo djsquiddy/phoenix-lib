@@ -14,8 +14,6 @@ import java.io.IOException;
 import java.util.EnumSet;
 
 /**
- * <p/>
- * <p/>
  * While running this class during Debug mode, methods that can only be called during a certain
  * state will throw a RuntimeException and log out the current state the Media Player is in.
  * <p/>
