@@ -13,13 +13,8 @@ import com.phoenix.lib.utils.GAUtils;
  *
  * @author Dylan
  */
-public abstract class PhoenixApplication extends Application {
-
+public abstract class BaseApplication extends Application {
     private static Context sContext;
-
-    public PhoenixApplication() {
-        super();
-    }
 
     public static Context getContext() {
         return sContext;
