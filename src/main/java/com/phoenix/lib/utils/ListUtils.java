@@ -17,8 +17,8 @@ public class ListUtils {
 
     }
 
-    public static <TType> List<TType> asListFromValues(@NonNull SparseArray<TType> sparseArray) {
-        List<TType> arrayList = new ArrayList<TType>(sparseArray.size());
+    public static <T> List<T> asListFromValues(@NonNull SparseArray<T> sparseArray) {
+        List<T> arrayList = new ArrayList<T>(sparseArray.size());
         for (int i = 0; i < sparseArray.size(); i++) {
             arrayList.add(sparseArray.valueAt(i));
         }
@@ -26,8 +26,8 @@ public class ListUtils {
         return arrayList;
     }
 
-    public static <TType> List<TType> asListFromKeys(@NonNull SparseArray<TType> sparseArray) {
-        List<TType> arrayList = new ArrayList<TType>(sparseArray.size());
+    public static <T> List<T> asListFromKeys(@NonNull SparseArray<T> sparseArray) {
+        List<T> arrayList = new ArrayList<T>(sparseArray.size());
         for (int i = 0; i < sparseArray.size(); i++) {
             arrayList.add(sparseArray.valueAt(i));
         }

@@ -396,7 +396,7 @@ public class Logger {
     }
 
     public static class Builder {
-        private static final Logger mLogger = new Logger();
+        private static final Logger mLogger = getInstance();
 
         public Builder setLogger(BaseLog logger) {
             mLogger.mLogger = logger;

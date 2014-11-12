@@ -27,7 +27,7 @@ package com.phoenix.lib.log;
 import android.content.Context;
 
 import com.phoenix.lib.R;
-import com.phoenix.lib.app.PhoenixApplication;
+import com.phoenix.lib.app.BaseApplication;
 
 
 /**
@@ -90,7 +90,7 @@ public enum LogLevel {
     }
 
     public int getColor() {
-        return (PhoenixApplication.getContext() != null) ? PhoenixApplication.getContext().getResources().getColor(mColorId) : getDefaultColor(this);
+        return (BaseApplication.getContext() != null) ? BaseApplication.getContext().getResources().getColor(mColorId) : getDefaultColor(this);
     }
 
     public int getColor(final Context context) {
@@ -99,7 +99,7 @@ public enum LogLevel {
 
     @Override
     public String toString() {
-        return (PhoenixApplication.getContext() != null) ? PhoenixApplication.getContext().getString(mNameId) : super.name();
+        return (BaseApplication.getContext() != null) ? BaseApplication.getContext().getString(mNameId) : super.name();
     }
 
     public String toString(final Context context) {

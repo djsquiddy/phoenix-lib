@@ -8,7 +8,7 @@ import com.google.android.gms.analytics.GoogleAnalytics;
 import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.Tracker;
 import com.phoenix.lib.R;
-import com.phoenix.lib.app.PhoenixApplication;
+import com.phoenix.lib.app.BaseApplication;
 import com.phoenix.lib.dialogs.GoogleAnalyticsDialog;
 
 import java.util.HashMap;
@@ -27,15 +27,18 @@ public class GAUtils {
      * application instance.
      */
     public enum TrackerName {
-        APP_TRACKER, // Tracker used only in this
+        // Tracker used only in this
         // app.
-        GLOBAL_TRACKER, // Tracker used by all the
+        APP_TRACKER,
+        // Tracker used by all the
         // apps from a company.
         // eg: roll-up tracking.
-        ECOMMERCE_TRACKER, // Tracker used by all
+        GLOBAL_TRACKER,
+        // Tracker used by all
         // ecommerce
         // transactions from a
         // company.
+        ECOMMERCE_TRACKER
     }
 
     private static final String TAG = GAUtils.class.getSimpleName();
@@ -66,17 +69,17 @@ public class GAUtils {
     }
 
     public synchronized Tracker getTracker(TrackerName trackerId) {
-        PhoenixApplication phoenixApplication = getPhoenixApplication();
+        BaseApplication baseApplication = getPhoenixApplication();
 
-        if (phoenixApplication == null || isEnabled() || phoenixApplication.getAnalyticsId() == 0) {
+        if (baseApplication == null || isEnabled() || baseApplication.getAnalyticsId() == 0) {
             Log.e(TAG, "Trying to get Analytics tracker without an id");
             return null;
         }
 
         if (!mTrackers.containsKey(trackerId)) {
 
-            GoogleAnalytics analytics = GoogleAnalytics.getInstance(phoenixApplication);
-            Tracker t = (trackerId == TrackerName.APP_TRACKER) ? analytics.newTracker(phoenixApplication.getAnalyticsId())
+            GoogleAnalytics analytics = GoogleAnalytics.getInstance(baseApplication);
+            Tracker t = (trackerId == TrackerName.APP_TRACKER) ? analytics.newTracker(baseApplication.getAnalyticsId())
                     : analytics.newTracker(R.xml.global_tracker);
             t.enableAdvertisingIdCollection(true);
             mTrackers.put(trackerId, t);
@@ -85,8 +88,8 @@ public class GAUtils {
         return mTrackers.get(trackerId);
     }
 
-    private PhoenixApplication getPhoenixApplication() {
-        return (mContext.getApplicationContext() instanceof PhoenixApplication) ? ((PhoenixApplication) mContext.getApplicationContext()) : null;
+    private BaseApplication getPhoenixApplication() {
+        return (mContext.getApplicationContext() instanceof BaseApplication) ? ((BaseApplication) mContext.getApplicationContext()) : null;
     }
 
     public boolean isEnabled() {

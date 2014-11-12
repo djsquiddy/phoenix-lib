@@ -3,7 +3,7 @@ package com.phoenix.lib.utils;
 import android.provider.Settings;
 import android.util.Log;
 
-import com.phoenix.lib.app.PhoenixActivity;
+import com.phoenix.lib.app.BaseActivity;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -22,7 +22,7 @@ public class DeviceUtils {
 
     }
 
-    public static String getDeviceId(PhoenixActivity activity) {
+    public static String getDeviceId(BaseActivity activity) {
         String android_id = Settings.Secure.getString(activity.getContentResolver(), Settings.Secure.ANDROID_ID);
 
         return DeviceUtils.md5(android_id).toUpperCase();
@@ -32,7 +32,7 @@ public class DeviceUtils {
 
         try {
             // Create MD5 Hash
-            MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+            MessageDigest digest = MessageDigest.getInstance("MD5");
             digest.update(s.getBytes());
             byte messageDigest[] = digest.digest();
 

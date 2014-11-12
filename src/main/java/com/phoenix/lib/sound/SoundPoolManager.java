@@ -15,7 +15,7 @@ import java.util.Stack;
  * Created by Dylan on 8/25/2014.
  * <p/>
  * Example usage:
- * SoundPoolPlayer sound = new SoundPoolPlayer(getContext, 4);
+ * SoundPoolPlayer sound = new SoundPoolPlayer(getContext());
  * <p/>
  * In on create:
  * sound.playShortResource(R.raw.<sound_name>);

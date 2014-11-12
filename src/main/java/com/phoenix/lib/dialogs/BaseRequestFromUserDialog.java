@@ -38,11 +38,13 @@ import java.util.Date;
 public abstract class BaseRequestFromUserDialog {
 
     public static final String PREF_NAME = "com.phoenix.lib.RequestFromUserPrefs";
+    protected Context mContext;
+
     private Date mInstallDate = new Date();
     private int mLaunchTimes = 0;
     private boolean mOptOut = false;
     private Dialog mDialog;
-protected Context mContext;
+
     /**
      * Call this API when the launcher activity is launched.<br>
      * It is better to call this API in onStart() of the launcher activity.
