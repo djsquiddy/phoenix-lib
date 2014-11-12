@@ -11,22 +11,24 @@ import com.phoenix.lib.log.Logger;
 
 import java.util.Date;
 
-/// <summary>
-/// Usage
-///
-///@Override
-///protected void onStart()
-///{
-///  super.onStart();
-///
-///  BaseRequestFromUserDialog dialog = new InheritedClass();
-///  dialog.onStart(this);
-///  dialog.showRateDialogIfNeeded(this);
-///  //If the criteria is satisfied, "Rate this app" dialog will be shown
-///  RateThisApp.showRateDialogIfNeeded(this);
-///}
-///
-/// </summary>
+/**
+ * <summary>
+ * Usage.
+ *
+ * <code>
+ *  @Override protected void onStart()
+ *  {
+ *      super.onStart();
+ *
+ *      BaseRequestFromUserDialog dialog = new InheritedClass();
+ *      dialog.onStart(this);
+ *      dialog.showRateDialogIfNeeded(this);
+ *      //If the criteria is satisfied, "Rate this app" dialog will be shown
+ *      RateThisApp.showRateDialogIfNeeded(this);
+ *  }
+ *  </code>
+ *  </summary>
+ */
 
 /**
  * date: 9/14/2014
@@ -40,12 +42,13 @@ public abstract class BaseRequestFromUserDialog {
     private int mLaunchTimes = 0;
     private boolean mOptOut = false;
     private Dialog mDialog;
-
+protected Context mContext;
     /**
      * Call this API when the launcher activity is launched.<br>
      * It is better to call this API in onStart() of the launcher activity.
      */
     public void onStart(Context context) {
+        mContext = context;
         SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = pref.edit();
         // If it is the first launch, save the date in shared preference.
@@ -176,11 +179,11 @@ public abstract class BaseRequestFromUserDialog {
      */
     protected abstract int getInstallDays();
 
-    protected abstract int getDialogTitle();
+    protected abstract CharSequence getDialogTitle();
 
-    protected abstract int getDialogMessage();
+    protected abstract CharSequence getDialogMessage();
 
-    protected abstract int getPositiveButtonText();
+    protected abstract CharSequence getPositiveButtonText();
 
     protected abstract void onPositiveButtonPress(final Context context);
 

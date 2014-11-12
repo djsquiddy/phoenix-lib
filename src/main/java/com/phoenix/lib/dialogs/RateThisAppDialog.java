@@ -45,18 +45,18 @@ public class RateThisAppDialog extends BaseRequestFromUserDialog {
     }
 
     @Override
-    protected int getDialogTitle() {
-        return R.string.phoenix_rate_app_dialog_title;
+    protected CharSequence getDialogTitle() {
+        return mContext.getResources().getString(R.string.phoenix_rate_app_dialog_title);
     }
 
     @Override
-    protected int getDialogMessage() {
-        return R.string.phoenix_rate_app_dialog_message;
+    protected CharSequence getDialogMessage() {
+        return mContext.getResources().getString(R.string.phoenix_rate_app_dialog_message);
     }
 
     @Override
-    protected int getPositiveButtonText() {
-        return R.string.phoenix_rate_app_dialog_ok;
+    protected CharSequence getPositiveButtonText() {
+        return mContext.getResources().getString(R.string.phoenix_rate_app_dialog_ok);
     }
 
     @Override
